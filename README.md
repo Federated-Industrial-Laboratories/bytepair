@@ -158,6 +158,17 @@ occur in valid UTF-8. Every witness re-verifies through HuggingFace `tokenizers`
 zero mismatches. The method, the proofs, and the full result are in
 [`docs/CENSUS.md`](docs/CENSUS.md).
 
+## Behavioral fingerprint
+
+`tools/fingerprint.py` pins a HuggingFace tokenizer's behavior to a file and diffs two
+such files with names rather than checksums: the split regex's per-codepoint
+classification over all of Unicode (probed behaviorally, about three seconds on this
+machine), the normalizer's effective Unicode version located by a ladder of dated
+combining marks, the contraction fold sets, normalizer outputs and golden token ids for
+fixed probe sets, and the declared pipeline. Take a fingerprint at release, take another
+after any library upgrade or model update, and `diff` reports what actually changed,
+down to the codepoint. Requires only Python and the `tokenizers` package.
+
 ## Library use
 
 The complete API is in [`include/bytepair.h`](include/bytepair.h). Encode and decode are
