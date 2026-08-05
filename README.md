@@ -260,4 +260,6 @@ selects the quick differential run only). `tests/mutate.sh` reads the same varia
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE). The Unicode Character Database files under `tests/data/ucd/`
+and `tests/data/ucd9/` are redistributed under the
+[Unicode License v3](tests/data/UNICODE-LICENSE.txt).
