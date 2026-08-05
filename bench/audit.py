@@ -144,8 +144,8 @@ def main():
         "cpu": model, "cpu_flags": flags, "threads": os.cpu_count(),
         "kernel": platform.release(), "python": platform.python_version(),
         "versions": tool_versions(),
-        "bytepair_commit": subprocess.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True,
+        "bytepair_src_tree": subprocess.run(
+            ["git", "rev-parse", "HEAD:src"], capture_output=True,
             text=True).stdout.strip() or None,
         "methodology": "docs split after newline at >=8192 bytes; best of 3; "
                        "ids compared against pinned HuggingFace tokenizers",
