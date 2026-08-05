@@ -1,0 +1,5 @@
+build/
+tests/data/fetched/
+__pycache__/
+*.o
+*.bpv

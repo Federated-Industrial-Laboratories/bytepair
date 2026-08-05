@@ -1,0 +1,22 @@
+{
+ "artifact": "hf_classes.bin.gz",
+ "artifact_sha256": "4cd900fb2d2da04488e26cd027d5276964abc685c7a7c74eed22d8224a8214e7",
+ "counts": {
+  "CR/LF": 2,
+  "letter": 141028,
+  "number": 1911,
+  "other": 971148,
+  "whitespace": 25
+ },
+ "format": "gzip of 1114112 class bytes, one per codepoint from U+0000; bits L=1 N=2 S=4 NL=8",
+ "generated_utc": "2026-08-05T20:04:16Z",
+ "probe_strings": [
+  "a<CP>a",
+  "!<CP>!"
+ ],
+ "probed_build": "tokenizers 0.22.2 (Python 3.12.3)",
+ "surrogates": "U+D800..U+DFFF recorded as class 0 without probing",
+ "tokenizer_file": "qwen3-tokenizer.json",
+ "tokenizer_sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4",
+ "unmodelled_shapes": []
+}
