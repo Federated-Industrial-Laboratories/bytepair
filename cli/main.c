@@ -200,6 +200,9 @@ static int usage(void)
         "  count  <vocab.bpv> [file]         token count to stdout\n"
         "  decode <vocab.bpv> [file]         ids (whitespace-separated) to text\n"
         "  bench  <vocab.bpv> <file> [N]     throughput with N threads (default 1)\n"
+        "  census <vocab.bpv> [json] [--deep] [--limit N]\n"
+        "                                    vocabulary reachability census\n"
+        "  witness <vocab.bpv> <id>          one token's verdict and witness\n"
         "  info   <vocab.bpv>                vocabulary summary\n");
     return 1;
 }
@@ -210,7 +213,8 @@ int main(int argc, char **argv)
     if (argc < 3) return usage();
     const char *cmd = argv[1];
     if (strcmp(cmd, "info") && strcmp(cmd, "encode") && strcmp(cmd, "count") &&
-        strcmp(cmd, "decode") && strcmp(cmd, "bench"))
+        strcmp(cmd, "decode") && strcmp(cmd, "bench") &&
+        strcmp(cmd, "census") && strcmp(cmd, "witness"))
         return usage(); /* before any file is touched: exit 1, always */
     double t_open = now_s();
     bp_vocab *v = open_vocab(argv[2]);
@@ -303,6 +307,37 @@ done_dec:
         int threads = argc > 4 ? atoi(argv[4]) : 1;
         if (threads < 1) threads = 1;
         rc = cmd_bench(v, file, threads, flags);
+    } else if (!strcmp(cmd, "census")) {
+        /* census <vocab.bpv> [json-out] [--deep] [--limit N] */
+        FILE *json = NULL;
+        int deep = 0;
+        uint32_t limit = 0;
+        for (int i = 3; i < argc; i++) {
+            if (!strcmp(argv[i], "--deep")) deep = 1;
+            else if (!strcmp(argv[i], "--limit") && i + 1 < argc)
+                limit = (uint32_t)strtoul(argv[++i], NULL, 10);
+            else if (!json) {
+                json = fopen(argv[i], "w");
+                if (!json) {
+                    fprintf(stderr, "bytepair: %s: cannot open for writing\n",
+                            argv[i]);
+                    bp_vocab_close(v);
+                    return 2;
+                }
+            }
+        }
+        bp_ctx *c = bp_ctx_new(v, BP_CTX_DEFAULT_CACHE);
+        if (!c) { if (json) fclose(json); bp_vocab_close(v); return 4; }
+        rc = bp_census_run(v, c, json, deep, limit, stdout) ? 4 : 0;
+        bp_ctx_free(c);
+        if (json) fclose(json);
+    } else if (!strcmp(cmd, "witness")) {
+        if (!file) { bp_vocab_close(v); return usage(); }
+        bp_ctx *c = bp_ctx_new(v, BP_CTX_DEFAULT_CACHE);
+        if (!c) { bp_vocab_close(v); return 4; }
+        rc = bp_census_witness(v, c, (uint32_t)strtoul(file, NULL, 10),
+                               stdout) ? 4 : 0;
+        bp_ctx_free(c);
     } else {
         bp_vocab_close(v);
         return usage();

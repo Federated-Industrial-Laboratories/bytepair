@@ -4,7 +4,7 @@
  "padding": null,
  "added_tokens": [
   {
-   "id": 258,
+   "id": 262,
    "content": "<|end|>",
    "single_word": false,
    "lstrip": false,
@@ -13,7 +13,7 @@
    "special": true
   },
   {
-   "id": 259,
+   "id": 263,
    "content": "[PAD]",
    "single_word": false,
    "lstrip": false,
@@ -323,7 +323,11 @@
    "ł": 254,
    "Ń": 255,
    "Å¿": 256,
-   "Å¿x": 257
+   "Å¿x": 257,
+   "12": 258,
+   "bc": 259,
+   "ab": 260,
+   "abc": 261
   },
   "merges": [
    [
@@ -333,6 +337,22 @@
    [
     "Å¿",
     "x"
+   ],
+   [
+    "1",
+    "2"
+   ],
+   [
+    "b",
+    "c"
+   ],
+   [
+    "a",
+    "b"
+   ],
+   [
+    "ab",
+    "c"
    ]
   ]
  }

@@ -90,6 +90,19 @@ int64_t bp_decode(bp_ctx *c, const uint32_t *ids, size_t n,
 const char *bp_strerror(int err);
 const char *bp_version(void); /* "0.1.0" */
 
+/* ---- vocabulary reachability census ----------------------------------
+ * Classifies every token id: reachable with a verifying witness string
+ * (added / self / context), provably impossible with a stated reason, or
+ * unresolved within the bounded search. Every witness is independently
+ * re-encoded through bp_encode before being reported; bp_census_run
+ * returns nonzero only if such a re-verification fails, which would be a
+ * defect in the census itself. json (optional) receives a full
+ * machine-readable report; out receives the human summary. */
+#include <stdio.h>
+int bp_census_run(const bp_vocab *v, bp_ctx *c, FILE *json, int deep,
+                  uint32_t limit, FILE *out);
+int bp_census_witness(const bp_vocab *v, bp_ctx *c, uint32_t id, FILE *out);
+
 #ifdef __cplusplus
 }
 #endif

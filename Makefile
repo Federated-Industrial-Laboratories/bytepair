@@ -15,7 +15,7 @@ endif
 
 BUILD := build
 SRC   := src/bp_util.c src/bp_vocab.c src/bp_nfc.c src/bp_scan.c \
-         src/bp_scan_avx2.c src/bp_bpe.c src/bp_encode.c \
+         src/bp_scan_avx2.c src/bp_bpe.c src/bp_encode.c src/bp_census.c \
          src/tables/bp_uctables.c
 OBJ   := $(SRC:%.c=$(BUILD)/%.o)
 

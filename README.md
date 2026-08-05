@@ -144,6 +144,20 @@ a<think>b
 Global flags are `--raw`, `--scalar` and `--skip-special`. Exit codes are 0 success, 1 usage
 error, 2 input I/O error, 3 vocabulary open or validation error, 4 encode or decode error.
 
+## Vocabulary census
+
+`census <vocab.bpv> [json] [--deep]` classifies every token id as reachable (with a
+witness string any implementation can verify by encoding it), provably impossible (with
+a stated reason), or unresolved within an explicit search bound; `witness <vocab.bpv>
+<id>` reports one token with its evidence. For the Qwen3 vocabulary the census
+establishes, in about half a second, that 149,734 tokens are reachable, 1,932 are
+impossible, and 3 remain unresolved; the impossible set is dominated by Thai
+whole-syllable tokens that the split regex can never assemble, CJK compatibility
+ideographs that NFC removes before the scanner runs, and the 13 byte tokens that cannot
+occur in valid UTF-8. Every witness re-verifies through HuggingFace `tokenizers` with
+zero mismatches. The method, the proofs, and the full result are in
+[`docs/CENSUS.md`](docs/CENSUS.md).
+
 ## Library use
 
 The complete API is in [`include/bytepair.h`](include/bytepair.h). Encode and decode are

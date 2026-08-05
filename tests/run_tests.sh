@@ -38,6 +38,9 @@ python3 tools/bpv_convert.py tests/data/toy-longs.json build/toy-longs.bpv --qui
 "$BP_PY" tests/test_longs_toy.py "$BP_BIN" build/toy-longs.bpv \
     tests/data/toy-longs.json
 
+echo "== census verdicts on the toy =="
+python3 tests/test_census.py "$BP_BIN" build/toy-longs.bpv
+
 echo "== differential vs reference =="
 if [ -n "$BP_QUICK" ]; then
     "$BP_PY" tests/differential.py --bytepair "$BP_BIN" --bpv "$BP_BPV" \
