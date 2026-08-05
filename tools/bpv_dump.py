@@ -6,7 +6,7 @@ a sample of vocabulary entries, and then runs the structural integrity checks th
 must also enforce. Exits nonzero if any check fails.
 
 This reader is written independently of tools/bpv_convert.py on purpose: it re-derives the
-byte layout, the murmur3 fmix64 slot function and the probe sequence from docs/DESIGN.md
+byte layout, the murmur3 fmix64 slot function and the probe sequence from docs/FORMAT.md
 rather than importing them, so that agreement between the two programs is evidence rather
 than tautology. It needs no source tokenizer.json, so it can be pointed at an image
 produced by any tool, including a future C writer.
@@ -55,7 +55,7 @@ def check(cond, message):
 
 
 def fmix64(h):
-    """murmur3 fmix64, pinned in docs/DESIGN.md as the .bpv pair-table slot function."""
+    """murmur3 fmix64, pinned in docs/FORMAT.md as the .bpv pair-table slot function."""
     h &= MASK64
     h ^= h >> 33
     h = (h * 0xFF51AFD7ED558CCD) & MASK64

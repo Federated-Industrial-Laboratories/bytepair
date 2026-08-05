@@ -10,7 +10,7 @@
  *
  * Ordered alternation on a backtracking engine; every character matches one
  * alternative, so the spans partition the input and each pretoken feeds the
- * BPE engine directly. docs/DESIGN.md derives the consequences implemented
+ * BPE engine directly. docs/FORMAT.md derives the consequences implemented
  * here; the differential suite is the proof.
  *
  * Each position is decoded once. ASCII runs are extended by the AVX2

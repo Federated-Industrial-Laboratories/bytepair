@@ -30,8 +30,13 @@ def main():
     # fixture guard: the bridge token must exist or this whole test is vacuous
     assert hf.get_vocab().get("Å¿x") == 257, "toy vocabulary lost its bridge token"
 
+    # the toy also carries two added tokens with DIFFERING first bytes
+    # ("<|end|>", "[PAD]"), exercising the general matcher path that the
+    # Qwen3 vocabulary (all added tokens starting "<") never reaches
+    cases = ("'ſx", "a'ſx", "'ſ", "ſx",
+             "a<|end|>b", "x[PAD]y", "<|end|>[PAD]", "a<|endx[PADy")
     failures = 0
-    for text in ("'ſx", "a'ſx", "'ſ", "ſx"):
+    for text in cases:
         want = hf.encode(text, add_special_tokens=False).ids
         r = subprocess.run([binary, "encode", bpv], input=text.encode(),
                            capture_output=True)
@@ -39,7 +44,7 @@ def main():
         if got != want:
             print(f"FAIL {text!r}: hf {want} bytepair {got}")
             failures += 1
-    print(f"long-s toy: 4 cases, {failures} failures")
+    print(f"long-s toy: {len(cases)} cases, {failures} failures")
     return 1 if failures else 0
 
 if __name__ == "__main__":

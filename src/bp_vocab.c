@@ -20,10 +20,21 @@ static int section_ok(const bpv_section *s, size_t file_size, uint64_t elem)
     return 1;
 }
 
+/* AVX2 usability is hardware support AND OS-enabled YMM state: max leaf,
+ * OSXSAVE, XGETBV XCR0 bits 1..2, then leaf 7 AVX2+BMI2. */
 static int cpu_has_avx2_bmi2(void)
 {
 #if defined(__x86_64__)
     uint32_t a, b, c, d;
+    __asm__ volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d)
+                     : "a"(0u), "c"(0u));
+    if (a < 7) return 0;
+    __asm__ volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d)
+                     : "a"(1u), "c"(0u));
+    if (!((c >> 27) & 1)) return 0; /* OSXSAVE */
+    uint32_t lo, hi;
+    __asm__ volatile("xgetbv" : "=a"(lo), "=d"(hi) : "c"(0u));
+    if ((lo & 6) != 6) return 0;    /* XMM and YMM state enabled by the OS */
     __asm__ volatile("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d)
                      : "a"(7u), "c"(0u));
     return (b >> 5) & (b >> 8) & 1; /* AVX2 (EBX bit 5) and BMI2 (EBX bit 8) */
@@ -57,8 +68,10 @@ bp_vocab *bp_vocab_open(const char *path, int *err)
     bpv_header h;
     memcpy(&h, map, BPV_HDR_BYTES);
     if (h.magic != BPV_MAGIC || h.format_version != 1) goto fail;
-    if (h.profile_id != BPV_PROFILE_NONE && h.profile_id != BPV_PROFILE_GPT4)
-        goto fail;
+    /* profile 0 (no pretokenizer) is reserved in the format and refused
+     * here: 0.1 implements profile 1 only, and silently scanning a
+     * profile-0 image with the profile-1 scanner would be a lie */
+    if (h.profile_id != BPV_PROFILE_GPT4) goto fail;
     if (h.vocab_count == 0 || h.vocab_count > (1u << 21)) goto fail;
     if (h.added_count > 64) goto fail;
     if (h.pair_slots_log2 > 32) goto fail;
@@ -78,25 +91,63 @@ bp_vocab *bp_vocab_open(const char *path, int *err)
         goto fail;
     if (!section_ok(&h.meta, size, 0)) goto fail;
 
+    /* sections must not overlap: every later reader may then reason about
+     * each section independently */
+    {
+        const bpv_section *ss[6] = { &h.token_offsets, &h.token_blob,
+                                     &h.pair_table, &h.byte_to_id,
+                                     &h.added, &h.meta };
+        for (int i = 0; i < 6; i++)
+            for (int j = i + 1; j < 6; j++) {
+                if (ss[i]->off < ss[j]->off + ss[j]->size &&
+                    ss[j]->off < ss[i]->off + ss[i]->size)
+                    goto fail;
+            }
+    }
+
     const uint32_t *tok_off = (const uint32_t *)(map + h.token_offsets.off);
     for (uint32_t i = 0; i < h.vocab_count; i++)
         if (tok_off[i] > tok_off[i + 1]) goto fail;
     if (tok_off[h.vocab_count] > h.token_blob.size) goto fail;
 
+    /* pair table content: every occupied slot in range, and enough empty
+     * slots that the linear probe always terminates. The converter caps
+     * load at 0.65; the loader enforces it, because a full table would
+     * turn bp_pair_lookup into an infinite loop on a miss. */
+    {
+        const uint64_t *pt = (const uint64_t *)(map + h.pair_table.off);
+        uint64_t occupied = 0;
+        for (uint64_t s = 0; s < slots; s++) {
+            uint64_t key = pt[s * 2];
+            if (key == BPV_PAIR_EMPTY) continue;
+            occupied++;
+            if ((uint32_t)(key >> 32) >= h.vocab_count ||
+                (uint32_t)key >= h.vocab_count ||
+                (uint32_t)pt[s * 2 + 1] >= h.vocab_count)
+                goto fail;
+        }
+        if (occupied > slots * 13 / 20) goto fail; /* load factor > 0.65 */
+    }
+
+    /* byte tokens must map back to their own byte value, or a remapped
+     * byte_to_id silently rewrites text */
     const uint32_t *byte_id = (const uint32_t *)(map + h.byte_to_id.off);
     for (int i = 0; i < 256; i++) {
         uint32_t id = byte_id[i];
         if (id >= h.vocab_count) goto fail;
         if (tok_off[id + 1] - tok_off[id] != 1) goto fail; /* must be 1 byte */
+        if (map[h.token_blob.off + tok_off[id]] != (uint8_t)i) goto fail;
     }
 
+    /* added records must be exactly the token table's view of their id, or
+     * a shortened record would match a prefix and emit the full token's id */
     const bpv_added *added = (const bpv_added *)(map + h.added.off);
     for (uint32_t i = 0; i < h.added_count; i++) {
         if (added[i].id >= h.vocab_count) goto fail;
-        if (added[i].offset > h.token_blob.size ||
-            added[i].len > h.token_blob.size - added[i].offset)
-            goto fail;
         if (added[i].len == 0 || added[i].len > 250) goto fail;
+        if (added[i].offset != tok_off[added[i].id] ||
+            added[i].len != tok_off[added[i].id + 1] - tok_off[added[i].id])
+            goto fail;
         if (i && added[i].id <= added[i - 1].id) goto fail; /* sorted, unique */
     }
 
@@ -128,11 +179,16 @@ bp_vocab *bp_vocab_open(const char *path, int *err)
         v->meta_name = name;
     }
 
-    /* added-token matcher order: longest first, and all share a first byte */
+    /* added-token matcher: longest-first order, plus a 256-bit map of
+     * first bytes; when every token shares one first byte (Qwen3: '<') the
+     * scan uses memchr, otherwise a per-byte map test */
     if (h.added_count) {
         v->added_first = v->blob[added[0].offset];
+        v->added_single_first = 1;
         for (uint32_t i = 0; i < h.added_count; i++) {
-            if (v->blob[added[i].offset] != v->added_first) goto fail_v;
+            uint8_t fb = v->blob[added[i].offset];
+            if (fb != v->added_first) v->added_single_first = 0;
+            v->added_first_map[fb >> 3] |= (uint8_t)(1u << (fb & 7));
             v->added_order[i] = (uint16_t)i;
         }
         for (uint32_t i = 1; i < h.added_count; i++) { /* insertion sort */
@@ -168,12 +224,13 @@ void bp_vocab_close(bp_vocab *v)
     free(v);
 }
 
-uint32_t bp_vocab_size(const bp_vocab *v) { return v->hdr.vocab_count; }
-const char *bp_vocab_name(const bp_vocab *v) { return v->meta_name; }
+uint32_t bp_vocab_size(const bp_vocab *v) { return v ? v->hdr.vocab_count : 0; }
+const char *bp_vocab_name(const bp_vocab *v) { return v ? v->meta_name : NULL; }
 
 bp_ctx *bp_ctx_new(const bp_vocab *v, int cache_log2)
 {
-    if (!v || cache_log2 > 24) return NULL;
+    if (!v || cache_log2 < BP_CTX_DEFAULT_CACHE || cache_log2 > 24)
+        return NULL;
     bp_ctx *c = calloc(1, sizeof(*c));
     if (!c) return NULL;
     c->v = v;

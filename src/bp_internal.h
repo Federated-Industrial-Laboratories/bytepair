@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include "../include/bytepair.h"
 
-/* ---------- .bpv on-disk format (little-endian, see docs/DESIGN.md) ---- */
+/* ---------- .bpv on-disk format (little-endian, see docs/FORMAT.md) ---- */
 
 #define BPV_MAGIC 0x31565042u /* "BPV1" */
 
@@ -45,6 +45,9 @@ typedef struct {
     uint32_t flags;  /* bit0: special */
 } bpv_added;
 
+_Static_assert(sizeof(bpv_header) == 136, "bpv_header must match the file");
+_Static_assert(sizeof(bpv_added) == 16, "bpv_added must match the file");
+
 #define BPV_PAIR_EMPTY 0xFFFFFFFFFFFFFFFFull
 
 /* ---------- in-memory handles ------------------------------------------ */
@@ -62,7 +65,9 @@ struct bp_vocab {
     const char     *meta_name;/* NUL-terminated copy */
     /* added-token matcher: candidate indexes sorted by length desc */
     uint16_t        added_order[64];
-    uint8_t         added_first;   /* first byte shared by all added tokens */
+    uint8_t         added_first;      /* first byte, when all share one     */
+    int             added_single_first; /* nonzero: memchr fast path valid  */
+    uint8_t         added_first_map[32]; /* 256-bit map of first bytes      */
     int             use_avx2;      /* CPU supports the AVX2+BMI2 kernels */
 };
 

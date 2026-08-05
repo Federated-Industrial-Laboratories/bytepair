@@ -23,19 +23,34 @@ static void *xmalloc(size_t n)
     return p;
 }
 
+/* Reads the whole stream; the buffer is always NUL-terminated one byte
+ * past *len so text parsers (strtoull in decode) cannot run off the end. */
 static uint8_t *read_all(FILE *f, size_t *len)
 {
     size_t cap = 1 << 20, n = 0;
     uint8_t *buf = xmalloc(cap);
     for (;;) {
-        if (n == cap) { cap *= 2; buf = realloc(buf, cap); if (!buf) exit(4); }
-        size_t r = fread(buf + n, 1, cap - n, f);
+        if (n + 1 >= cap) { cap *= 2; buf = realloc(buf, cap); if (!buf) exit(4); }
+        size_t r = fread(buf + n, 1, cap - n - 1, f);
         n += r;
         if (r == 0) break;
     }
     if (ferror(f)) { free(buf); return NULL; }
+    buf[n] = 0;
     *len = n;
     return buf;
+}
+
+/* The vocabulary name comes from the file, which may be hostile: never let
+ * it drive the terminal. Everything below 0x20 and 0x7F prints escaped. */
+static void print_sanitized(const char *s)
+{
+    for (const unsigned char *p = (const unsigned char *)s; *p; p++) {
+        if (*p < 0x20 || *p == 0x7F)
+            printf("\\x%02X", *p);
+        else
+            putchar(*p);
+    }
 }
 
 static double now_s(void)
@@ -107,6 +122,11 @@ static int cmd_bench(bp_vocab *v, const char *file, int threads,
 {
     size_t len;
     uint8_t *text = load_input(file, &len);
+    if (len == 0) {
+        fprintf(stderr, "bytepair: bench: empty input\n");
+        free(text);
+        return 2;
+    }
 
     /* split into ~8 KB documents on line boundaries, like the recon bench */
     size_t cap = len / 4096 + 2, ndocs = 0;
@@ -189,6 +209,9 @@ int main(int argc, char **argv)
     uint32_t flags = parse_flags(&argc, argv);
     if (argc < 3) return usage();
     const char *cmd = argv[1];
+    if (strcmp(cmd, "info") && strcmp(cmd, "encode") && strcmp(cmd, "count") &&
+        strcmp(cmd, "decode") && strcmp(cmd, "bench"))
+        return usage(); /* before any file is touched: exit 1, always */
     double t_open = now_s();
     bp_vocab *v = open_vocab(argv[2]);
     t_open = now_s() - t_open;
@@ -196,9 +219,10 @@ int main(int argc, char **argv)
     int rc = 0;
 
     if (!strcmp(cmd, "info")) {
-        printf("name: %s\nvocab: %u\nversion: %s\nopen: %.3f ms\n",
-               bp_vocab_name(v), bp_vocab_size(v), bp_version(),
-               t_open * 1e3);
+        printf("name: ");
+        print_sanitized(bp_vocab_name(v));
+        printf("\nvocab: %u\nversion: %s\nopen: %.3f ms\n",
+               bp_vocab_size(v), bp_version(), t_open * 1e3);
     } else if (!strcmp(cmd, "encode") || !strcmp(cmd, "count")) {
         size_t len;
         uint8_t *text = load_input(file, &len);
@@ -215,7 +239,16 @@ int main(int argc, char **argv)
             printf("%lld\n", (long long)n);
         } else {
             uint32_t *ids = xmalloc((size_t)n * sizeof(uint32_t));
-            bp_encode(c, (const char *)text, len, ids, (size_t)n, flags);
+            int64_t n2 = bp_encode(c, (const char *)text, len, ids,
+                                   (size_t)n, flags);
+            if (n2 != n) {
+                fprintf(stderr, "bytepair: %s\n",
+                        bp_strerror(n2 < 0 ? (int)n2 : BP_E_ARG));
+                free(ids);
+                bp_ctx_free(c);
+                rc = 4;
+                goto done_text;
+            }
             for (int64_t i = 0; i < n; i++)
                 printf("%u\n", ids[i]);
             free(ids);
@@ -231,8 +264,15 @@ done_text:
         char *s = (char *)text, *end = s + len;
         while (s < end) {
             char *next;
-            unsigned long val = strtoul(s, &next, 10);
+            unsigned long long val = strtoull(s, &next, 10);
             if (next == s) { s++; continue; }
+            if (val > 0xFFFFFFFFull) {
+                fprintf(stderr, "bytepair: %s\n", bp_strerror(BP_E_RANGE));
+                free(ids);
+                free(text);
+                bp_vocab_close(v);
+                return 4;
+            }
             if (n == cap) {
                 cap *= 2;
                 ids = realloc(ids, cap * sizeof(uint32_t));

@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="672" viewBox="0 0 880 672" role="img" aria-label="Benchmark comparison">
+<rect width="880" height="672" fill="#1a1a19" rx="6"/>
+<text x="20" y="26" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="14" font-weight="600" fill="#ffffff">bytepair benchmark</text>
+<text x="20" y="44" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" fill="#c3c2b7">Intel Xeon E5-2680 v4 @ 2.40GHz, 2026-08-05. Reproduce with: sh bench/audit.sh</text>
+<circle cx="580" cy="22" r="5" fill="#3987e5"/>
+<text x="590" y="26" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" fill="#c3c2b7">bytepair</text>
+<circle cx="656" cy="22" r="5" fill="#898781"/>
+<text x="666" y="26" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" fill="#c3c2b7">comparison implementations</text>
+<text x="20" y="77" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="600" fill="#c3c2b7">vocabulary open (ms, log scale)</text>
+<line x1="128.0" y1="86" x2="128.0" y2="182" stroke="#2c2c2a" stroke-width="1"/>
+<text x="128.0" y="196" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">1</text>
+<line x1="306.0" y1="86" x2="306.0" y2="182" stroke="#2c2c2a" stroke-width="1"/>
+<text x="306.0" y="196" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">10</text>
+<line x1="484.0" y1="86" x2="484.0" y2="182" stroke="#2c2c2a" stroke-width="1"/>
+<text x="484.0" y="196" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">100</text>
+<line x1="662.0" y1="86" x2="662.0" y2="182" stroke="#2c2c2a" stroke-width="1"/>
+<text x="662.0" y="196" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">1000</text>
+<line x1="840.0" y1="86" x2="840.0" y2="182" stroke="#2c2c2a" stroke-width="1"/>
+<text x="840.0" y="196" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">10000</text>
+<text x="118" y="102" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="600" fill="#c3c2b7" text-anchor="end">bytepair</text>
+<line x1="128" y1="98" x2="840" y2="98" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="186.0" cy="98" r="5" fill="#3987e5"/>
+<text x="196.0" y="102" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="start" style="font-variant-numeric:tabular-nums">2.12</text>
+<text x="118" y="126" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">GigaToken</text>
+<line x1="128" y1="122" x2="840" y2="122" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="593.4" cy="122" r="5" fill="#898781"/>
+<text x="603.4" y="126" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">412</text>
+<text x="118" y="150" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">HF tokenizers</text>
+<line x1="128" y1="146" x2="840" y2="146" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="584.6" cy="146" r="5" fill="#898781"/>
+<text x="594.6" y="150" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">367</text>
+<text x="118" y="174" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">bpe-qwen</text>
+<line x1="128" y1="170" x2="840" y2="170" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="831.7" cy="170" r="5" fill="#898781"/>
+<text x="821.7" y="174" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="end" style="font-variant-numeric:tabular-nums">8,980</text>
+<text x="20" y="229" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="600" fill="#c3c2b7">single thread, enwik8-8mb (MB/s, log scale)</text>
+<line x1="128.0" y1="238" x2="128.0" y2="334" stroke="#2c2c2a" stroke-width="1"/>
+<text x="128.0" y="348" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">1</text>
+<line x1="484.0" y1="238" x2="484.0" y2="334" stroke="#2c2c2a" stroke-width="1"/>
+<text x="484.0" y="348" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">10</text>
+<line x1="840.0" y1="238" x2="840.0" y2="334" stroke="#2c2c2a" stroke-width="1"/>
+<text x="840.0" y="348" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">100</text>
+<text x="118" y="254" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="600" fill="#c3c2b7" text-anchor="end">bytepair</text>
+<line x1="128" y1="250" x2="840" y2="250" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="681.8" cy="250" r="5" fill="#3987e5"/>
+<text x="691.8" y="254" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="start" style="font-variant-numeric:tabular-nums">35.9</text>
+<text x="118" y="278" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">GigaToken</text>
+<line x1="128" y1="274" x2="840" y2="274" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="823.3" cy="274" r="5" fill="#898781"/>
+<text x="813.3" y="278" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="end" style="font-variant-numeric:tabular-nums">89.8</text>
+<text x="118" y="302" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">HF tokenizers</text>
+<line x1="128" y1="298" x2="840" y2="298" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="191.7" cy="298" r="5" fill="#898781"/>
+<text x="201.7" y="302" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">1.51</text>
+<text x="118" y="326" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">bpe-qwen</text>
+<line x1="128" y1="322" x2="840" y2="322" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="501.5" cy="322" r="5" fill="#898781"/>
+<text x="511.5" y="326" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">11.2</text>
+<text x="20" y="381" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="600" fill="#c3c2b7">all 28 threads, enwik8-8mb (MB/s, log scale)</text>
+<line x1="128.0" y1="390" x2="128.0" y2="486" stroke="#2c2c2a" stroke-width="1"/>
+<text x="128.0" y="500" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">10</text>
+<line x1="484.0" y1="390" x2="484.0" y2="486" stroke="#2c2c2a" stroke-width="1"/>
+<text x="484.0" y="500" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">100</text>
+<line x1="840.0" y1="390" x2="840.0" y2="486" stroke="#2c2c2a" stroke-width="1"/>
+<text x="840.0" y="500" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">1000</text>
+<text x="118" y="406" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="600" fill="#c3c2b7" text-anchor="end">bytepair</text>
+<line x1="128" y1="402" x2="840" y2="402" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="685.3" cy="402" r="5" fill="#3987e5"/>
+<text x="695.3" y="406" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="start" style="font-variant-numeric:tabular-nums">368</text>
+<text x="118" y="430" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">GigaToken</text>
+<line x1="128" y1="426" x2="840" y2="426" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="464.4" cy="426" r="5" fill="#898781"/>
+<text x="474.4" y="430" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">88.1</text>
+<text x="118" y="454" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">HF tokenizers</text>
+<line x1="128" y1="450" x2="840" y2="450" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="151.6" cy="450" r="5" fill="#898781"/>
+<text x="161.6" y="454" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">11.7</text>
+<text x="118" y="478" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">bpe-qwen</text>
+<text x="134" y="478" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" font-style="italic">no batch API</text>
+<text x="20" y="533" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="600" fill="#c3c2b7">single thread, cjk-synthetic, cache-hostile (MB/s, log scale)</text>
+<line x1="128.0" y1="542" x2="128.0" y2="638" stroke="#2c2c2a" stroke-width="1"/>
+<text x="128.0" y="652" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">1</text>
+<line x1="484.0" y1="542" x2="484.0" y2="638" stroke="#2c2c2a" stroke-width="1"/>
+<text x="484.0" y="652" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">10</text>
+<line x1="840.0" y1="542" x2="840.0" y2="638" stroke="#2c2c2a" stroke-width="1"/>
+<text x="840.0" y="652" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10" fill="#898781" text-anchor="middle" style="font-variant-numeric:tabular-nums">100</text>
+<text x="118" y="558" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="600" fill="#c3c2b7" text-anchor="end">bytepair</text>
+<line x1="128" y1="554" x2="840" y2="554" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="389.9" cy="554" r="5" fill="#3987e5"/>
+<text x="399.9" y="558" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="600" fill="#ffffff" text-anchor="start" style="font-variant-numeric:tabular-nums">5.44</text>
+<text x="118" y="582" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">GigaToken</text>
+<line x1="128" y1="578" x2="840" y2="578" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="561.1" cy="578" r="5" fill="#898781"/>
+<text x="571.1" y="582" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">16.5</text>
+<text x="118" y="606" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">HF tokenizers</text>
+<line x1="128" y1="602" x2="840" y2="602" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="205.4" cy="602" r="5" fill="#898781"/>
+<text x="215.4" y="606" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">1.65</text>
+<text x="118" y="630" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="11" font-weight="400" fill="#c3c2b7" text-anchor="end">bpe-qwen</text>
+<line x1="128" y1="626" x2="840" y2="626" stroke="#2c2c2a" stroke-width="1"/>
+<circle cx="507.1" cy="626" r="5" fill="#898781"/>
+<text x="517.1" y="630" font-family='system-ui, -apple-system, "Segoe UI", sans-serif' font-size="10.5" font-weight="400" fill="#c3c2b7" text-anchor="start" style="font-variant-numeric:tabular-nums">11.6</text>
+</svg>

@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 
-# header field offsets (docs/DESIGN.md, pinned layout)
+# header field offsets (docs/FORMAT.md, pinned layout)
 MAGIC = 0
 VERSION = 4
 FLAGS = 8
@@ -95,6 +95,59 @@ def main():
     shifted = bytearray(data[:meta_off] + b"\x00\x00\x00\x00" + data[meta_off:])
     struct.pack_into("<Q", shifted, SEC_META, meta_off + 4)
     cases.append(("unaligned-coherent-meta", bytes(shifted)))
+
+    # ---- hostile-content cases, from the adversarial review 2026-08-05:
+    # each of these opened cleanly before content validation existed and
+    # then hung the encoder or produced silent wrong output
+
+    cases.append(("profile-zero", patched(data, PROFILE, "<I", 0)))
+
+    pair_off = struct.unpack_from("<Q", data, SEC_PAIR)[0]
+    pair_log2 = struct.unpack_from("<I", data, PAIR_LOG2)[0]
+    slots = 1 << pair_log2
+
+    # a single-slot table whose one slot is occupied: without the occupancy
+    # rule, any missing pair probes this slot forever
+    b = bytearray(data)
+    struct.pack_into("<I", b, PAIR_LOG2, 0)
+    struct.pack_into("<Q", b, SEC_PAIR + 8, 16)
+    struct.pack_into("<QQ", b, pair_off, 0, 0)  # key (0,0), value 0: occupied
+    cases.append(("pair-single-slot-occupied", bytes(b)))
+
+    # push occupancy past the 0.65 bound by filling empty slots
+    b = bytearray(data)
+    need = slots * 13 // 20 + 1
+    occupied = 0
+    empties = []
+    for s in range(slots):
+        if struct.unpack_from("<Q", b, pair_off + 16 * s)[0] == (1 << 64) - 1:
+            empties.append(s)
+        else:
+            occupied += 1
+    for s in empties[: need - occupied]:
+        struct.pack_into("<QQ", b, pair_off + 16 * s, 0, 0)
+    cases.append(("pair-overfull", bytes(b)))
+
+    # first occupied slot: value's merged id out of range / key out of range
+    first_occ = next(s for s in range(slots)
+                     if struct.unpack_from("<Q", data, pair_off + 16 * s)[0]
+                     != (1 << 64) - 1)
+    cases.append(("pair-value-oob", patched(
+        data, pair_off + 16 * first_occ + 8, "<I", 0x00FFFFFF)))
+    cases.append(("pair-key-oob", patched(
+        data, pair_off + 16 * first_occ + 4, "<I", 0x00FFFFFF)))
+
+    # added record shrunk to a prefix / shifted off its token: without the
+    # cross-check every "<" in the input becomes <|endoftext|>
+    cases.append(("added-record-shrunk", patched(data, added_off + 8, "<I", 1)))
+    add0_off = struct.unpack_from("<I", data, added_off + 4)[0]
+    cases.append(("added-record-moved", patched(
+        data, added_off + 4, "<I", add0_off + 1)))
+
+    # byte 'A' remapped to the (single-byte) token of 'B': text rewriting
+    id_b = struct.unpack_from("<I", data, byte_to_id_off + 4 * 66)[0]
+    cases.append(("byte-id-remap", patched(
+        data, byte_to_id_off + 4 * 65, "<I", id_b)))
 
     failures = 0
     with tempfile.TemporaryDirectory() as td:

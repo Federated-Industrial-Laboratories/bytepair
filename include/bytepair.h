@@ -2,7 +2,7 @@
  *
  * Exact-match guarantee: with a .bpv built from the Qwen3 tokenizer.json,
  * bp_encode/bp_decode reproduce HuggingFace `tokenizers` output token for
- * token on valid UTF-8 input (see docs/DESIGN.md for the verified pipeline).
+ * token on valid UTF-8 input (see docs/FORMAT.md for the pipeline specification).
  *
  * Thread model: bp_vocab is immutable and shareable across threads after
  * bp_vocab_open; every thread uses its own bp_ctx. The library takes no
@@ -50,8 +50,12 @@ enum {
     BP_SKIP_SPECIAL = 1u << 2  /* bp_decode: omit special added tokens   */
 };
 
-/* Open a .bpv vocabulary file (memory-mapped, validated). Returns NULL on
- * failure; if err is non-NULL it receives a BP_E_* code. */
+/* Open a .bpv vocabulary file (memory-mapped, fully validated: structure,
+ * section bounds and overlap, pair-table occupancy and content ranges,
+ * byte mappings, added-token records). Returns NULL on failure; if err is
+ * non-NULL it receives a BP_E_* code. The file is mapped for the handle's
+ * lifetime: truncating it concurrently from outside the process is
+ * undefined, as with any memory-mapped file. */
 bp_vocab *bp_vocab_open(const char *path, int *err);
 void      bp_vocab_close(bp_vocab *v);
 
@@ -59,7 +63,8 @@ uint32_t    bp_vocab_size(const bp_vocab *v);  /* max id + 1, added included */
 const char *bp_vocab_name(const bp_vocab *v);  /* source name from meta      */
 
 /* Per-thread context. Cache_log2 in [0,24] sets the pretoken cache to
- * 2^cache_log2 entries; pass BP_CTX_DEFAULT_CACHE for the default (2^15). */
+ * 2^cache_log2 entries (0 disables it); pass BP_CTX_DEFAULT_CACHE for the
+ * default (2^15). Any other value is rejected with NULL. */
 #define BP_CTX_DEFAULT_CACHE (-1)
 bp_ctx *bp_ctx_new(const bp_vocab *v, int cache_log2);
 void    bp_ctx_free(bp_ctx *c);

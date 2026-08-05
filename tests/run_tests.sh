@@ -22,6 +22,17 @@ BP_PY="${BP_PY:-python3}"
 echo "== loader unit tests =="
 python3 tests/unit_loader.py "$BP_BIN" "$BP_BPV"
 
+echo "== nfc conformance (C normalizer) =="
+if [ -x build/nfc_conformance ]; then
+    build/nfc_conformance tests/data/ucd9/NormalizationTest.txt
+else
+    echo "run_tests: build/nfc_conformance not built (make check builds it)" >&2
+    exit 2
+fi
+
+echo "== robustness fuzz =="
+python3 tests/fuzz_lite.py "$BP_BIN" "$BP_BPV"
+
 echo "== long-s toy vocabulary =="
 python3 tools/bpv_convert.py tests/data/toy-longs.json build/toy-longs.bpv --quiet
 "$BP_PY" tests/test_longs_toy.py "$BP_BIN" build/toy-longs.bpv \
@@ -34,6 +45,19 @@ if [ -n "$BP_QUICK" ]; then
 else
     "$BP_PY" tests/differential.py --bytepair "$BP_BIN" --bpv "$BP_BPV" \
         --tokenizer "$BP_TOKENIZER" ${BP_CORPUS:+--corpus "$BP_CORPUS"}
+fi
+
+echo "== differential vs reference, forced scalar =="
+# the scalar scanner is the documented non-AVX2 fallback; it gets the same
+# suite, always, so a break in it can never hide behind the SIMD path
+if [ -n "$BP_QUICK" ]; then
+    BYTEPAIR_FORCE_SCALAR=1 "$BP_PY" tests/differential.py \
+        --bytepair "$BP_BIN" --bpv "$BP_BPV" --tokenizer "$BP_TOKENIZER" \
+        --quick
+else
+    BYTEPAIR_FORCE_SCALAR=1 "$BP_PY" tests/differential.py \
+        --bytepair "$BP_BIN" --bpv "$BP_BPV" --tokenizer "$BP_TOKENIZER" \
+        ${BP_CORPUS:+--corpus "$BP_CORPUS"}
 fi
 
 echo "== all suites passed =="

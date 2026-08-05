@@ -3,7 +3,7 @@
 
 Python 3 standard library only. Offline tool: no network, no third-party packages.
 
-The .bpv format is specified in docs/DESIGN.md, section "The .bpv format". This file is
+The .bpv format is specified in docs/FORMAT.md, section "The .bpv format". This file is
 the reference producer; tools/bpv_dump.py is an independent reader used to check it, and
 the C loader must agree with both byte for byte.
 
@@ -42,7 +42,7 @@ from array import array
 
 CONVERTER_VERSION = "bpv_convert 0.1.0"
 
-# --- format constants (docs/DESIGN.md, "The .bpv format") ---------------------
+# --- format constants (docs/FORMAT.md, "The .bpv format") ---------------------
 
 MAGIC = 0x31565042  # b"BPV1" read as a little-endian u32
 FORMAT_VERSION = 1
@@ -106,7 +106,7 @@ def fnv1a64(data):
 
 
 def fmix64(h):
-    """murmur3 fmix64, pinned in docs/DESIGN.md as the .bpv pair-table slot function."""
+    """murmur3 fmix64, pinned in docs/FORMAT.md as the .bpv pair-table slot function."""
     h &= MASK64
     h ^= h >> 33
     h = (h * 0xFF51AFD7ED558CCD) & MASK64
@@ -233,7 +233,7 @@ def validate_pre_tokenizer(doc):
         "unsupported ByteLevel: use_regex must be false, got %r" % (bl.get("use_regex"),),
     )
     # trim_offsets affects reported character offsets only. bytepair 0.1 has no offsets
-    # API (docs/DESIGN.md, "Non-goals for 0.1"), so the field cannot change any id.
+    # API (docs/FORMAT.md), so the field cannot change any id.
 
 
 def validate_model(doc):

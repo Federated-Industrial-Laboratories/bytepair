@@ -2,7 +2,26 @@
  "version": "1.0",
  "truncation": null,
  "padding": null,
- "added_tokens": [],
+ "added_tokens": [
+  {
+   "id": 258,
+   "content": "<|end|>",
+   "single_word": false,
+   "lstrip": false,
+   "rstrip": false,
+   "normalized": false,
+   "special": true
+  },
+  {
+   "id": 259,
+   "content": "[PAD]",
+   "single_word": false,
+   "lstrip": false,
+   "rstrip": false,
+   "normalized": false,
+   "special": true
+  }
+ ],
  "normalizer": {
   "type": "NFC"
  },

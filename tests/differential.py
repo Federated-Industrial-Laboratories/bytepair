@@ -86,7 +86,7 @@ def gen_cases(rng, quick):
     ws = " \t\n\r   　"
     cases = []
 
-    # worked consequences from docs/DESIGN.md (must stay in sync)
+    # worked consequences from docs/FORMAT.md (must stay in sync)
     cases += ["it's", "IT'S", "it’s", "'ſx", "it'ſ", "'lLx", "can'T do",
               "a   b", " 5", "  \n\n  \nx", "x  \n", "x  ", "\tword",
               "a<think>b", "<|endoftext|>", "x<|fim_prefix|>y",
@@ -172,6 +172,37 @@ def main():
         if got != want:
             r.failures += 1
             print(f"FAIL [decode] {s!r}: {got!r} != {want!r}")
+
+    # --raw oracle: an HF tokenizer with its added tokens stripped treats
+    # control-token strings as plain text, exactly what BP_RAW promises
+    import json as _json, subprocess as _sp, tempfile
+    tok = _json.load(open(args.tokenizer))
+    tok["added_tokens"] = []
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as tf:
+        _json.dump(tok, tf)
+        raw_path = tf.name
+    hf_raw = Tokenizer.from_file(raw_path)
+    for s in ["<|endoftext|>", "a<think>b", "x<|fim_prefix|>y",
+              "a<|im_start|>b<|im_end|>c", "<tool_call><think>",
+              "plain text stays plain"]:
+        r.cases += 1
+        want = hf_raw.encode(s, add_special_tokens=False).ids
+        got = bp_encode(args, s, raw=True)
+        if got != want:
+            r.failures += 1
+            print(f"FAIL [raw] {s!r}: hf-stripped {want} bytepair {got}")
+
+    # --skip-special decode oracle: HF's skip_special_tokens=True
+    for s in ["a<|im_start|>b<think>c", "<|endoftext|>x"]:
+        ids = hf.encode(s, add_special_tokens=False).ids
+        want = hf.decode(ids, skip_special_tokens=True).encode()
+        rr = _sp.run([args.bytepair, "--skip-special", "decode", args.bpv],
+                     input=" ".join(map(str, ids)).encode(),
+                     capture_output=True)
+        r.cases += 1
+        if rr.returncode != 0 or rr.stdout != want:
+            r.failures += 1
+            print(f"FAIL [skip-special] {s!r}: {rr.stdout!r} != {want!r}")
 
     # full-codepoint sweep document (fixture must be non-trivial)
     if not args.quick:

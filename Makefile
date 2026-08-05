@@ -42,6 +42,12 @@ $(BUILD)/uctables_selftest: src/tables/bp_uctables_selftest.c \
                             $(BUILD)/src/tables/bp_uctables.o
 	$(CC) $(CFLAGS) $^ -o $@
 
+$(BUILD)/nfc_conformance: tests/nfc_conformance.c $(BUILD)/src/bp_nfc.o \
+                          $(BUILD)/src/bp_util.o \
+                          $(BUILD)/src/tables/bp_uctables.o \
+                          $(BUILD)/src/bp_vocab.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
 # fetch the pinned reference tokenizer and build the vocabulary image
 vocab: $(BUILD)/qwen3.bpv
 tests/data/fetched/qwen3-tokenizer.json:
@@ -51,7 +57,7 @@ $(BUILD)/qwen3.bpv: tests/data/fetched/qwen3-tokenizer.json tools/bpv_convert.py
 	python3 tools/bpv_convert.py tests/data/fetched/qwen3-tokenizer.json $@ \
 	    --source-name qwen3-tokenizer.json
 
-check: all $(BUILD)/uctables_selftest $(BUILD)/qwen3.bpv
+check: all $(BUILD)/uctables_selftest $(BUILD)/nfc_conformance $(BUILD)/qwen3.bpv
 	$(BUILD)/uctables_selftest
 	sh tests/run_tests.sh
 

@@ -5,7 +5,7 @@
  *
  * Added tokens are matched on raw input before normalization, longest match
  * first at each position, because that is what HuggingFace does (verified
- * empirically; see docs/DESIGN.md). */
+ * empirically; see docs/FORMAT.md). */
 #include <string.h>
 #include "bp_internal.h"
 
@@ -50,9 +50,16 @@ int64_t bp_encode(bp_ctx *c, const char *utf8, size_t len,
 
     size_t seg_start = 0, i = 0;
     while (i < len) {
-        const uint8_t *hit = memchr(t + i, v->added_first, len - i);
-        if (!hit) break;
-        i = (size_t)(hit - t);
+        if (v->added_single_first) {
+            const uint8_t *hit = memchr(t + i, v->added_first, len - i);
+            if (!hit) break;
+            i = (size_t)(hit - t);
+        } else {
+            while (i < len &&
+                   !(v->added_first_map[t[i] >> 3] & (1u << (t[i] & 7))))
+                i++;
+            if (i >= len) break;
+        }
         const bpv_added *a = match_added(v, t + i, len - i);
         if (!a) { i++; continue; }
         if ((rc = encode_segment(c, t + seg_start, i - seg_start, &s, simd)))

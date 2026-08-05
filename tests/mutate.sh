@@ -16,6 +16,40 @@ BP_PY="${BP_PY:-python3}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WORK="$ROOT/build/mutate"
 
+# Preflight: every judging suite must PASS on an unmutated build first.
+# Without this, a dead oracle (missing tokenizer, broken venv) makes every
+# mutation look caught - eight failures scored as eight successes.
+preflight() {
+    dir="$WORK/pristine"
+    rm -rf "$dir"
+    mkdir -p "$dir"
+    cp -r "$ROOT/src" "$ROOT/include" "$ROOT/cli" "$ROOT/tests" "$dir/"
+    ( cd "$dir" && \
+      gcc -std=c11 -O2 -Wall -fno-strict-aliasing -mavx2 -mbmi2 \
+        -Iinclude -Isrc \
+        src/bp_util.c src/bp_vocab.c src/bp_nfc.c src/bp_scan.c \
+        src/bp_scan_avx2.c src/bp_bpe.c src/bp_encode.c \
+        src/tables/bp_uctables.c cli/main.c \
+        -o bytepair-mut -lpthread ) || {
+        echo "mutate: preflight build failed" >&2; exit 2; }
+    python3 "$dir/tests/unit_loader.py" "$dir/bytepair-mut" "$BP_BPV" \
+        >/dev/null || { echo "mutate: loader oracle does not pass on the" \
+        "unmutated build" >&2; exit 2; }
+    python3 "$ROOT/tools/bpv_convert.py" "$ROOT/tests/data/toy-longs.json" \
+        "$dir/toy-longs.bpv" --quiet
+    "$BP_PY" "$dir/tests/test_longs_toy.py" "$dir/bytepair-mut" \
+        "$dir/toy-longs.bpv" "$ROOT/tests/data/toy-longs.json" \
+        >/dev/null || { echo "mutate: long-s oracle does not pass on the" \
+        "unmutated build" >&2; exit 2; }
+    "$BP_PY" "$dir/tests/differential.py" --bytepair "$dir/bytepair-mut" \
+        --bpv "$BP_BPV" --tokenizer "$BP_TOKENIZER" --quick \
+        ${BP_CORPUS:+--corpus "$BP_CORPUS"} >/dev/null || {
+        echo "mutate: differential oracle does not pass on the unmutated" \
+        "build" >&2; exit 2; }
+    echo "preflight: all oracles pass on the unmutated build"
+}
+preflight
+
 run_one() {
     name="$1" file="$2" pattern="$3" replacement="$4" suite="$5"
     dir="$WORK/$name"
@@ -45,6 +79,14 @@ run_one() {
         if python3 "$dir/tests/unit_loader.py" "$dir/bytepair-mut" "$BP_BPV" \
             >/dev/null 2>&1; then
             echo "SURVIVED $name: loader suite stayed green" >&2
+            exit 1
+        fi
+    elif [ "$suite" = "diff-scalar" ]; then
+        if BYTEPAIR_FORCE_SCALAR=1 "$BP_PY" "$dir/tests/differential.py" \
+            --bytepair "$dir/bytepair-mut" --bpv "$BP_BPV" \
+            --tokenizer "$BP_TOKENIZER" --quick \
+            >/dev/null 2>&1; then
+            echo "SURVIVED $name: forced-scalar differential stayed green" >&2
             exit 1
         fi
     elif [ "$suite" = "longs" ]; then
@@ -105,5 +147,11 @@ run_one longs-contraction-dropped src/bp_scan.c \
 run_one added-tokens-dropped src/bp_encode.c \
     'if ((flags \& BP_RAW) || v->hdr.added_count == 0)' \
     'if (1)' diff
+
+# a break confined to the scalar scanner must be caught by the scalar pass;
+# the SIMD-mode suite cannot see it (from the adversarial review 2026-08-05)
+run_one scalar-letter-run-broken src/bp_scan.c \
+    'if (!(bp_char_class(b) \& BP_CC_L)) return j;' \
+    'if (1) return j;' diff-scalar
 
 echo "== all mutations caught =="
