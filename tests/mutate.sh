@@ -11,7 +11,7 @@
 set -e
 
 BP_BPV="${BP_BPV:-build/qwen3.bpv}"
-BP_TOKENIZER="${BP_TOKENIZER:-tests/data/fetched/tokenizer.json}"
+BP_TOKENIZER="${BP_TOKENIZER:-tests/data/fetched/qwen3-tokenizer.json}"
 BP_PY="${BP_PY:-python3}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 WORK="$ROOT/build/mutate"

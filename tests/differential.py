@@ -4,7 +4,7 @@
 Run under a Python environment with `tokenizers` installed:
 
     python3 tests/differential.py --bytepair build/bytepair \
-        --bpv build/qwen3.bpv --tokenizer tests/data/fetched/tokenizer.json \
+        --bpv build/qwen3.bpv --tokenizer tests/data/fetched/qwen3-tokenizer.json \
         [--corpus path] [--quick]
 
 Exit codes: 0 all equal, 1 mismatch found, 2 setup error.

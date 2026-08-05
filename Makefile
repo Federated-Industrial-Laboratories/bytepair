@@ -44,11 +44,11 @@ $(BUILD)/uctables_selftest: src/tables/bp_uctables_selftest.c \
 
 # fetch the pinned reference tokenizer and build the vocabulary image
 vocab: $(BUILD)/qwen3.bpv
-tests/data/fetched/tokenizer.json:
+tests/data/fetched/qwen3-tokenizer.json:
 	sh tests/fetch_qwen3.sh
-$(BUILD)/qwen3.bpv: tests/data/fetched/tokenizer.json tools/bpv_convert.py
+$(BUILD)/qwen3.bpv: tests/data/fetched/qwen3-tokenizer.json tools/bpv_convert.py
 	@mkdir -p $(BUILD)
-	python3 tools/bpv_convert.py tests/data/fetched/tokenizer.json $@ \
+	python3 tools/bpv_convert.py tests/data/fetched/qwen3-tokenizer.json $@ \
 	    --source-name qwen3-tokenizer.json
 
 check: all $(BUILD)/uctables_selftest $(BUILD)/qwen3.bpv

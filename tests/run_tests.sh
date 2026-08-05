@@ -4,7 +4,7 @@
 # Environment (defaults in parentheses):
 #   BP_BIN       bytepair binary            (build/bytepair)
 #   BP_BPV       .bpv vocabulary            (build/qwen3.bpv)
-#   BP_TOKENIZER reference tokenizer.json   (tests/data/fetched/tokenizer.json)
+#   BP_TOKENIZER reference tokenizer.json   (tests/data/fetched/qwen3-tokenizer.json)
 #   BP_PY        python with `tokenizers`   (python3)
 #   BP_CORPUS    bulk corpus, optional      (unset)
 #   BP_QUICK     nonempty = quick differential only
@@ -12,7 +12,7 @@ set -e
 
 BP_BIN="${BP_BIN:-build/bytepair}"
 BP_BPV="${BP_BPV:-build/qwen3.bpv}"
-BP_TOKENIZER="${BP_TOKENIZER:-tests/data/fetched/tokenizer.json}"
+BP_TOKENIZER="${BP_TOKENIZER:-tests/data/fetched/qwen3-tokenizer.json}"
 BP_PY="${BP_PY:-python3}"
 
 [ -x "$BP_BIN" ] || { echo "run_tests: $BP_BIN not built" >&2; exit 2; }
