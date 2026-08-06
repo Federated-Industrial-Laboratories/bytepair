@@ -113,6 +113,21 @@ completions are absorbed by Latin-1 merges), id 125388 (a hiragana fragment), an
 139793 (a Thai fragment); each survived exhaustive one- and two-character completion
 searches without either a witness or a proof.
 
+## Related work
+
+Isolated-token reachability tests exist in prior work: Sander Land's self-encoding
+analysis of o200k_base ("Unreachable tokens in GPT-4o", Token Contributions) finds
+twelve unreachable tokens by decoding and re-encoding each token alone, and the
+tokenizer-adaptation literature audits inserted tokens through the merge graph
+(strict merge reachability, arXiv 2608.00582; the merge ordering problem, arXiv
+2512.03989). This census differs in producing a three-way exact partition for a stock
+vocabulary: witnesses for the reachable (including tokens only reachable in context,
+which the isolated test misclassifies), sound impossibility proofs with reasons, and
+an explicit bound on the remainder. The boundary lemma is what turns the isolated
+merge test from a heuristic into a proof. "Fishing for Magikarp" (Land and Bartolo,
+EMNLP 2024) addresses the adjacent problem of tokens that are reachable but
+under-trained.
+
 ## Scope notes
 
 Reachability is defined for valid UTF-8 input under default encoding flags (added-token

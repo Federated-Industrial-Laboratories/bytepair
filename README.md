@@ -156,7 +156,9 @@ whole-syllable tokens that the split regex can never assemble, CJK compatibility
 ideographs that NFC removes before the scanner runs, and the 13 byte tokens that cannot
 occur in valid UTF-8. Every witness re-verifies through HuggingFace `tokenizers` with
 zero mismatches. The method, the proofs, and the full result are in
-[`docs/CENSUS.md`](docs/CENSUS.md).
+[`docs/CENSUS.md`](docs/CENSUS.md). A position on what the census reveals about pretokenization
+across writing systems, with the per-script breakdown, is in
+[`docs/PRETOKENIZATION.md`](docs/PRETOKENIZATION.md).
 
 ## Behavioral fingerprint
 
